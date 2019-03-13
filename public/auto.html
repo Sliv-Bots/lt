@@ -1,0 +1,90 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width" />
+    <title >Line of Dance</title>
+    <link href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css" rel="stylesheet" />
+    <script src="https://code.jquery.com/jquery-2.2.4.min.js"></script>
+    
+    <style> 
+        body {
+            background: #DCDCDC;
+        }
+        header{
+            width: 100%;
+            background: #FFFF00;
+            height: 40px; 
+        } 
+   </style>
+</head>
+<body> 
+
+    <header><h1 align="center"> <em>Концерт "Линия Времени"</em> </h1></header>
+
+    <h1 style="margin-left:20px; margin-top:150px;" align="center">ADMIN-PANEL</h1>
+    <h1></h1>
+    <form name="userForm">
+        <input type="hidden" name="id" value="0" />
+        <div class="form-group" align="center">
+            <label for="login"><h3> <b>LOGIN</b></h3></label>
+            <input type="textarea" class="form-control" name="login" style="width: 400px; height: 30; "/>
+        </div>
+        <div class="form-group" align="center">
+            <label for="password"><h3> <b>PASSWORD</b></h3></label>
+            <input class="form-control" name="password" style="width: 400px; height: 30;"/>
+        </div>
+        <div class="panel-body" align="center"> 
+            <button type="submit" class="btn btn-sm btn-primary" id='button'>Авторизоваться</button> 
+        </div>
+
+        <div id='err' align="center"></div>  
+         
+    </form> 
+  
+    <script>
+         
+       
+        function auto(login_, password_) {
+            $.ajax({
+                url: "adm",
+                contentType: "application/json",
+                method: "POST",
+                data: JSON.stringify({
+                    login: login_,
+                    password: password_
+                }),
+                success: function (user) { 
+                    if(login_ == 'lt' && password_ == 'vlad'){
+                        $('#button').replaceWith('<button><a id="test" href="/creater/apanel/admin">Нажмите для входа</a></button>');
+                        return;
+                    } 
+                    $('#err').replaceWith('<div id="err">Не верно введен логин или пароль</div>');
+                    
+                }
+            })
+        }
+  
+        // отправка формы
+        $("form").submit(function (e) {
+            e.preventDefault();
+            console.log(this.elements) 
+            var login = this.elements["login"].value;
+            var password = this.elements["password"].value;
+            
+            auto(login, password); 
+            
+        });
+         
+  
+    </script>
+
+    <footer>
+        <div>
+            <h5 style = "position: absolute; bottom: 0; width: 100%; height: 25px;  " align="center">Developer Vlad Kucher</h5>
+        </div>
+    </footer>
+
+</body>
+</html>
+ 

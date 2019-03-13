@@ -1,0 +1,82 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width" />
+    <title >Line of Dance</title>
+    <link href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css" rel="stylesheet" />
+    <script src="https://code.jquery.com/jquery-2.2.4.min.js"></script>
+    
+    <style> 
+        body {
+            background: #DCDCDC;
+        }
+        header{
+            width: 100%;
+            background: #FFFF00;
+            height: 40px; 
+        } 
+   </style>
+</head>
+<body> 
+
+    <header><h1 align="center"> <em>Концерт "Линия Времени"</em> </h1></header>
+    <h1 style="margin-left:20px; margin-top:100px;" align="center"></h1>
+
+    <table class="table table-condensed table-striped table-bordered" style=text-align:center>
+        <thead><tr>
+            <th style="width: 3%; text-align:center; background: yellow; border: 1px solid black;">ID</th>
+            <th bgcolor='#FFA500' style="width: 40%; text-align:center; border: 1px solid black;">Имена участников</th>
+            <th bgcolor='#B0E0E6' style="width: 30%; text-align:center; border: 1px solid black;">Название номера</th> 
+        </thead>
+        <tbody>
+        </tbody>
+    </table>
+  
+    <script>
+        // Получение всех пользователей
+        function GetUsers() {
+            $.ajax({
+                url: "/api/users",
+                type: "GET",
+                contentType: "application/json",
+                success: function (users) {
+                    var rows = "";
+                    $.each(users, function (index, user) {
+                        // добавляем полученные элементы в таблицу
+                        rows += row(user);
+                    })
+                    $("table tbody").append(rows);
+                 }
+            });
+        } 
+        // сброс формы
+        function reset() {
+            var form = document.forms["userForm"];
+            form.reset();
+            form.elements["id"].value = 0;
+        } 
+        // создание строки для таблицы
+        var row = function (user) {
+            return "<tr data-rowid='" + user.id + "'><td style='border: 1px solid black;'>" + user.id + "</td>" +
+                   "<td style='border: 1px solid black;'>" + user.names_people + "</td> <td style='border: 1px solid black;'>" + user.nomer_name + "</td>" 
+        }
+        // сброс значений формы
+        $("#reset").click(function (e) {
+            e.preventDefault();
+            reset();
+        }) 
+        // загрузка пользователей
+        GetUsers();
+  
+    </script>
+
+    <footer>
+        <div>
+            <a style = "position: absolute; bottom: 0; width: 100%; height: 20px;  " align="center" id="test" href="/adminka">Developer Vlad Kucher</a>
+        </div>
+    </footer>
+
+</body>
+</html>
+ 

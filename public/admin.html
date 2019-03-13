@@ -1,0 +1,189 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width" />
+    <title >Line of Dance</title>
+    <link href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css" rel="stylesheet" />
+    <script src="https://code.jquery.com/jquery-2.2.4.min.js"></script>
+    
+    <style> 
+        body {
+            background: #DCDCDC;
+        }
+        header{
+            width: 100%;
+            background: #FFFF00;
+            height: 40px; 
+        } 
+   </style>
+</head>
+<body> 
+
+    <header><h1 align="center"> <em>Концерт "Линия Времени"</em> </h1></header>
+    <h1></h1>
+
+    <form name="userForm">
+        <input type="hidden" name="id" value="0" />
+        <div class="form-group" align="center">
+            <label for="names_people"><h3> <b>Имена участников:</b></h3></label>
+            <input type="textarea" class="form-control" name="names_people" style="width: 500px; height: 40; "/>
+        </div>
+        <div class="form-group" align="center">
+            <label for="nomer_name"><h3> <b>Название номера:</b></h3></label>
+            <input class="form-control" name="nomer_name" style="width: 500px; height: 40;"/>
+        </div>
+        <div class="panel-body" align="center">
+            <button type="submit" class="btn btn-sm btn-primary">Сохранить</button>
+            <a id="reset" class="btn btn-sm btn-primary">Очистить</a>
+        </div>
+        <h1></h1> 
+    </form>
+    <table class="table table-condensed table-striped table-bordered" style=text-align:center>
+        <thead><tr>
+            <th style="width: 3%; text-align:center; background: yellow; border: 1px solid black;">ID</th>
+            <th bgcolor='#FFA500' style="width: 40%; text-align:center; border: 1px solid black;">Имена участников</th>
+            <th bgcolor='#B0E0E6' style="width: 30%; text-align:center; border: 1px solid black;">Название номера</th>
+            <th bgcolor='#00BFFF' style="width: 30%; text-align:center; border: 1px solid black;">Редактирование</th></tr>
+        </thead>
+        <tbody>
+        </tbody>
+    </table>
+  
+    <script>
+        // Получение всех пользователей
+        function GetUsers() {
+            $.ajax({
+                url: "/api/users",
+                type: "GET",
+                contentType: "application/json",
+                success: function (users) {
+                    var rows = "";
+                    $.each(users, function (index, user) {
+                        // добавляем полученные элементы в таблицу
+                        rows += row(user);
+                    })
+                    $("table tbody").append(rows);
+                 }
+            });
+        }
+        // Получение одного пользователя
+        function GetUser(id) {
+            $.ajax({
+                url: "/api/users/"+id,
+                type: "GET",
+                contentType: "application/json",
+                success: function (user) {
+                    var form = document.forms["userForm"];
+                    form.elements["id"].value = user.id;
+                    form.elements["names_people"].value = user.names_people;
+                    form.elements["nomer_name"].value = user.nomer_name;
+                }
+            });
+        }
+        // Добавление пользователя
+        function CreateUser(names_people_, nomer_name_) {
+            $.ajax({
+                url: "api/users",
+                contentType: "application/json",
+                method: "POST",
+                data: JSON.stringify({
+                    names_people: names_people_,
+                    nomer_name: nomer_name_
+                }),
+                success: function (user) {
+                    reset();
+                    $("table tbody").append(row(user));
+                }
+            })
+        }
+        // Изменение пользователя
+        function EditUser(userId, names_people_, nomer_name_) {
+            $.ajax({
+                url: "api/users",
+                contentType: "application/json",
+                method: "PUT",
+                data: JSON.stringify({
+                    id: userId,
+                    names_people: names_people_,
+                    nomer_name: nomer_name_
+                }),
+                success: function (user) {
+                    reset();
+                    $("tr[data-rowid='" + user.id + "']").replaceWith(row(user));
+                }
+            })
+        }
+  
+        // сброс формы
+        function reset() {
+            var form = document.forms["userForm"];
+            form.reset();
+            form.elements["id"].value = 0;
+        }
+  
+        // Удаление пользователя
+        function DeleteUser(id) {
+            $.ajax({
+                url: "api/users/"+id,
+                contentType: "application/json",
+                method: "DELETE",
+                success: function (user) {
+                    console.log(user);
+                    $("tr[data-rowid='" + user.id + "']").remove();
+                }
+            })
+        }
+
+        // создание строки для таблицы
+        var row = function (user) {
+            return "<tr data-rowid='" + user.id + "'><td style='border: 1px solid black;'>" + user.id + "</td>" +
+                   "<td style='border: 1px solid black;'>" + user.names_people + "</td> <td style='border: 1px solid black;'>" + user.nomer_name + "</td>" +
+                   "<td style='border: 1px solid black;'><a class='editLink' data-id='" + user.id + "'>Изменить</a> | " +
+                    "<a class='removeLink' data-id='" + user.id + "'>Удалить</a></td></tr>";
+        }
+        // сброс значений формы
+        $("#reset").click(function (e) {
+  
+            e.preventDefault();
+            reset();
+        })
+  
+        // отправка формы
+        $("form").submit(function (e) {
+            e.preventDefault();
+            console.log(this.elements)
+            var id = this.elements["id"].value;
+            var names_people_ = this.elements["names_people"].value;
+            var nomer_name_ = this.elements["nomer_name"].value;
+            if (id == 0)
+                CreateUser(names_people_, nomer_name_);
+            else
+                EditUser(id, names_people_, nomer_name_);
+        });
+  
+        // нажимаем на ссылку Изменить
+        $("body").on("click", ".editLink", function () {
+            var id = $(this).data("id");
+            GetUser(id);
+        })
+        // нажимаем на ссылку Удалить
+        $("body").on("click", ".removeLink", function () {
+            var id = $(this).data("id");
+            DeleteUser(id);
+        })
+  
+        // загрузка пользователей
+        GetUsers();
+  
+    </script>
+
+    <footer>
+        <div>
+            <h5 style = "position: absolute; bottom: 0; width: 100%; height: 25px;  " align="center">Developer Vlad Kucher</h5>
+        </div>
+    </footer>
+
+</body>
+</html>
+ 
